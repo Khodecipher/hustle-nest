@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { 
   Users, Wallet, CheckCircle, XCircle, Eye, 
   TrendingUp, Clock, Coins, ArrowLeft, Search,
-  UserCheck, UserX
+  UserCheck, UserX, LogOut
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,7 +21,7 @@ import { toast } from "sonner";
 import { Link } from "react-router-dom";
 
 export default function Admin() {
-  const [user, setUser] = useState(null);
+  const [adminUser, setAdminUser] = useState("admin");
   const [loading, setLoading] = useState(true);
   const [payments, setPayments] = useState([]);
   const [withdrawals, setWithdrawals] = useState([]);
@@ -37,17 +37,29 @@ export default function Admin() {
   });
 
   useEffect(() => {
+    // Check admin authentication
+    const adminAuth = localStorage.getItem("adminAuth");
+    if (!adminAuth) {
+      window.location.href = createPageUrl("AdminLogin");
+      return;
+    }
+    
+    try {
+      const auth = JSON.parse(adminAuth);
+      if (!auth.authenticated) {
+        window.location.href = createPageUrl("AdminLogin");
+        return;
+      }
+    } catch {
+      window.location.href = createPageUrl("AdminLogin");
+      return;
+    }
+
     loadData();
   }, []);
 
   const loadData = async () => {
     try {
-      const userData = await base44.auth.me();
-      if (userData.role !== 'admin') {
-        window.location.href = createPageUrl("Dashboard");
-        return;
-      }
-      setUser(userData);
 
       // Load all data in parallel
       const [paymentsData, withdrawalsData, usersData] = await Promise.all([
@@ -77,10 +89,15 @@ export default function Admin() {
       });
 
     } catch (err) {
-      toast.error("Access denied");
-      window.location.href = createPageUrl("Dashboard");
+      toast.error("Failed to load data");
     }
     setLoading(false);
+  };
+
+  const handleAdminLogout = () => {
+    localStorage.removeItem("adminAuth");
+    toast.success("Logged out successfully");
+    window.location.href = createPageUrl("AdminLogin");
   };
 
   const handlePaymentAction = async (payment, action) => {
@@ -96,21 +113,20 @@ export default function Admin() {
         const userToUpdate = allUsers.find(u => u.email === payment.user_email);
         if (userToUpdate) {
           await base44.entities.User.update(userToUpdate.id, { has_paid: true });
-        }
-
-        // Check if user was referred and create referral record
-        const referredUser = allUsers.find(u => u.email === payment.user_email);
-        if (referredUser?.referred_by) {
-          // Find referrer by referral code
-          const referrer = allUsers.find(u => u.referral_code === referredUser.referred_by);
-          if (referrer) {
-            await base44.entities.Referral.create({
-              referrer_email: referrer.email,
-              referred_email: referredUser.email,
-              referred_name: referredUser.full_name,
-              status: "confirmed",
-              counted_for_withdrawal: false
-            });
+          
+          // Check if user was referred and create referral record
+          if (userToUpdate.referred_by) {
+            // Find referrer by referral code
+            const referrer = allUsers.find(u => u.referral_code === userToUpdate.referred_by);
+            if (referrer) {
+              await base44.entities.Referral.create({
+                referrer_email: referrer.email,
+                referred_email: userToUpdate.email,
+                referred_name: userToUpdate.full_name,
+                status: "confirmed",
+                counted_for_withdrawal: false
+              });
+            }
           }
         }
 
@@ -135,7 +151,7 @@ export default function Admin() {
       
       await base44.entities.Withdrawal.update(withdrawal.id, {
         status: newStatus,
-        processed_by: user.email,
+        processed_by: adminUser,
         processed_at: new Date().toISOString()
       });
 
@@ -175,7 +191,7 @@ export default function Admin() {
       <header className="relative z-10 px-4 py-4 border-b border-slate-800">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link to={createPageUrl("Dashboard")} className="text-white/60 hover:text-white">
+            <Link to={createPageUrl("Landing")} className="text-white/60 hover:text-white">
               <ArrowLeft className="w-5 h-5" />
             </Link>
             <div className="flex items-center gap-3">
@@ -188,6 +204,15 @@ export default function Admin() {
               </div>
             </div>
           </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleAdminLogout}
+            className="text-white/60 hover:text-white hover:bg-slate-800"
+          >
+            <LogOut className="w-4 h-4 mr-2" />
+            Logout
+          </Button>
         </div>
       </header>
 
