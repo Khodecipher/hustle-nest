@@ -35,7 +35,7 @@ export default function Landing() {
     if (isLoggedIn) {
       window.location.href = createPageUrl("Dashboard");
     } else {
-      window.location.href = createPageUrl("Signup");
+      window.location.href = createPageUrl("Register");
     }
   };
 

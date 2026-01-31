@@ -52,6 +52,7 @@ import Payment from './pages/Payment';
 import Dashboard from './pages/Dashboard';
 import Admin from './pages/Admin';
 import AdminLogin from './pages/AdminLogin';
+import Register from './pages/Register';
 import __Layout from './Layout.jsx';
 
 
@@ -61,6 +62,7 @@ export const PAGES = {
     "Dashboard": Dashboard,
     "Admin": Admin,
     "AdminLogin": AdminLogin,
+    "Register": Register,
 }
 
 export const pagesConfig = {
