@@ -35,7 +35,7 @@ export default function Landing() {
     if (isLoggedIn) {
       window.location.href = createPageUrl("Dashboard");
     } else {
-      base44.auth.redirectToLogin(createPageUrl("Payment"));
+      window.location.href = createPageUrl("Signup");
     }
   };
 
