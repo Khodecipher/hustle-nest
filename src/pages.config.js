@@ -49,11 +49,15 @@
  */
 import Landing from './pages/Landing';
 import Payment from './pages/Payment';
+import Dashboard from './pages/Dashboard';
+import Admin from './pages/Admin';
 
 
 export const PAGES = {
     "Landing": Landing,
     "Payment": Payment,
+    "Dashboard": Dashboard,
+    "Admin": Admin,
 }
 
 export const pagesConfig = {
