@@ -136,7 +136,7 @@ export default function Landing() {
                 size="lg"
                 className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white text-lg px-8 py-6 rounded-xl"
               >
-                Start Earning Now
+                {isLoggedIn ? "Go to Dashboard" : "Start Earning Now"}
                 <ChevronRight className="w-5 h-5 ml-2" />
               </Button>
               <div className="flex items-center gap-2 text-white/50">
@@ -247,7 +247,7 @@ export default function Landing() {
               size="lg"
               className="bg-white text-amber-600 hover:bg-white/90 text-lg px-8 py-6 rounded-xl font-semibold"
             >
-              Join Hustle Nest
+              {isLoggedIn ? "Go to Dashboard" : "Join Hustle Nest"}
               <ChevronRight className="w-5 h-5 ml-2" />
             </Button>
           </motion.div>
