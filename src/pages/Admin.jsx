@@ -40,18 +40,18 @@ export default function Admin() {
     // Check admin authentication
     const adminAuth = localStorage.getItem("adminAuth");
     if (!adminAuth) {
-      window.location.href = createPageUrl("AdminLogin");
+      window.location.href = createPageUrl("AdminPanel");
       return;
     }
     
     try {
       const auth = JSON.parse(adminAuth);
       if (!auth.authenticated) {
-        window.location.href = createPageUrl("AdminLogin");
+        window.location.href = createPageUrl("AdminPanel");
         return;
       }
     } catch {
-      window.location.href = createPageUrl("AdminLogin");
+      window.location.href = createPageUrl("AdminPanel");
       return;
     }
 
