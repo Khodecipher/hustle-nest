@@ -105,7 +105,7 @@ export default function Admin() {
       if (action === 'confirm') {
         await base44.entities.Payment.update(payment.id, {
           status: 'confirmed',
-          confirmed_by: user.email,
+          confirmed_by: adminUser,
           confirmed_at: new Date().toISOString()
         });
 
