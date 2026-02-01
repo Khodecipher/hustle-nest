@@ -78,12 +78,32 @@ export default function Landing() {
             </div>
             <span className="text-xl font-bold text-white">Hustle Nest</span>
           </div>
-          <Button 
-            onClick={handleGetStarted}
-            className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white"
-          >
-            {isLoggedIn ? "Dashboard" : "Get Started"}
-          </Button>
+          <div className="flex items-center gap-3">
+            {isLoggedIn ? (
+              <Button 
+                onClick={handleGetStarted}
+                className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white"
+              >
+                Dashboard
+              </Button>
+            ) : (
+              <>
+                <Button 
+                  onClick={() => base44.auth.redirectToLogin(createPageUrl("Dashboard"))}
+                  variant="outline"
+                  className="border-slate-600 text-white hover:bg-slate-800"
+                >
+                  Login
+                </Button>
+                <Button 
+                  onClick={handleGetStarted}
+                  className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white"
+                >
+                  Sign Up
+                </Button>
+              </>
+            )}
+          </div>
         </nav>
       </header>
 
