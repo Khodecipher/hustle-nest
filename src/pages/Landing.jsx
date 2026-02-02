@@ -32,7 +32,11 @@ export default function Landing() {
   };
 
   const handleGetStarted = () => {
-    base44.auth.redirectToLogin(createPageUrl("Dashboard"));
+    if (isLoggedIn) {
+      window.location.href = createPageUrl("Dashboard");
+    } else {
+      window.location.href = createPageUrl("Register");
+    }
   };
 
   const features = [
@@ -85,14 +89,14 @@ export default function Landing() {
             ) : (
               <>
                 <Button 
-                  onClick={() => base44.auth.redirectToLogin(createPageUrl("Dashboard"))}
+                  onClick={() => base44.auth.redirectToLogin(createPageUrl("Payment"))}
                   variant="outline"
                   className="border-slate-600 text-white hover:bg-slate-800"
                 >
                   Login
                 </Button>
                 <Button 
-                  onClick={handleGetStarted}
+                  onClick={() => window.location.href = createPageUrl("Register")}
                   className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white"
                 >
                   Sign Up
