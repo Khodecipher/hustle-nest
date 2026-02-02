@@ -33,7 +33,7 @@ export default function Landing() {
 
   const handleGetStarted = () => {
     if (isLoggedIn) {
-      window.location.href = createPageUrl("Dashboard");
+      base44.auth.redirectToLogin(createPageUrl("Dashboard"));
     } else {
       window.location.href = createPageUrl("Register");
     }
