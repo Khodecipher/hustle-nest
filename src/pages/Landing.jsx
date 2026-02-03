@@ -35,7 +35,7 @@ export default function Landing() {
     if (isLoggedIn) {
       window.location.href = createPageUrl("Dashboard");
     } else {
-      window.location.href = createPageUrl("Register");
+      base44.auth.redirectToLogin(createPageUrl("Payment"));
     }
   };
 
@@ -87,21 +87,12 @@ export default function Landing() {
                 Dashboard
               </Button>
             ) : (
-              <>
-                <Button 
-                  onClick={() => base44.auth.redirectToLogin(createPageUrl("Payment"))}
-                  variant="outline"
-                  className="border-slate-600 text-white hover:bg-slate-800"
-                >
-                  Login
-                </Button>
-                <Button 
-                  onClick={() => window.location.href = createPageUrl("Register")}
-                  className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white"
-                >
-                  Sign Up
-                </Button>
-              </>
+              <Button 
+                onClick={() => base44.auth.redirectToLogin(createPageUrl("Payment"))}
+                className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white"
+              >
+                Login / Sign Up
+              </Button>
             )}
           </div>
         </nav>

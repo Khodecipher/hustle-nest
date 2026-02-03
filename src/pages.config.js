@@ -51,7 +51,6 @@ import Admin from './pages/Admin';
 import Dashboard from './pages/Dashboard';
 import Landing from './pages/Landing';
 import Payment from './pages/Payment';
-import Register from './pages/Register';
 import __Layout from './Layout.jsx';
 
 
@@ -60,7 +59,6 @@ export const PAGES = {
     "Dashboard": Dashboard,
     "Landing": Landing,
     "Payment": Payment,
-    "Register": Register,
 }
 
 export const pagesConfig = {
