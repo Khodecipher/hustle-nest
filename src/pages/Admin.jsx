@@ -37,26 +37,24 @@ export default function Admin() {
   });
 
   useEffect(() => {
-    // Check admin authentication
-    const adminAuth = localStorage.getItem("adminAuth");
-    if (!adminAuth) {
-      window.location.href = createPageUrl("AdminPanel");
-      return;
-    }
-    
+    checkAdminAndLoadData();
+  }, []);
+
+  const checkAdminAndLoadData = async () => {
     try {
-      const auth = JSON.parse(adminAuth);
-      if (!auth.authenticated) {
-        window.location.href = createPageUrl("AdminPanel");
+      const userData = await base44.auth.me();
+      if (userData.role !== 'admin') {
+        toast.error("Admin access required");
+        window.location.href = createPageUrl("Dashboard");
         return;
       }
-    } catch {
-      window.location.href = createPageUrl("AdminPanel");
-      return;
+      setAdminUser(userData.email);
+      loadData();
+    } catch (err) {
+      toast.error("Please log in");
+      base44.auth.redirectToLogin(createPageUrl("Admin"));
     }
-
-    loadData();
-  }, []);
+  };
 
   const loadData = async () => {
     try {
@@ -95,9 +93,7 @@ export default function Admin() {
   };
 
   const handleAdminLogout = () => {
-    localStorage.removeItem("adminAuth");
-    toast.success("Logged out successfully");
-    window.location.href = createPageUrl("AdminLogin");
+    base44.auth.logout(createPageUrl("Landing"));
   };
 
   const handlePaymentAction = async (payment, action) => {
