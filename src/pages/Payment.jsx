@@ -253,7 +253,7 @@ export default function Payment() {
                 num: "01",
                 title: "Go to Pursa",
                 desc: "Visit the Pursa Exchange website.",
-                action: { label: "Open Pursa", url: "https://pursa.io" }
+                action: { label: "Open Pursa", url: "https://pursa.co" }
               },
               {
                 num: "02",
