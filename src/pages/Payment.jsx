@@ -209,41 +209,109 @@ export default function Payment() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-2xl p-6 border border-slate-700/50"
+          className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-2xl p-6 border border-slate-700/50 mb-4"
         >
-          <h2 className="text-lg font-semibold text-white mb-4">Payment Details</h2>
-          
+          <h2 className="text-lg font-semibold text-white mb-1">USDT Wallet Address</h2>
+          <p className="text-white/50 text-sm mb-4">Network: <span className="text-amber-400 font-semibold">{NETWORK}</span></p>
+
+          <div className="bg-slate-900/70 rounded-xl p-4 border border-slate-700 mb-4">
+            <p className="text-white/50 text-xs mb-2">Send USDT to this address:</p>
+            <p className="text-white font-mono text-sm break-all leading-relaxed">{USDT_ADDRESS}</p>
+            <Button
+              onClick={() => copyToClipboard(USDT_ADDRESS)}
+              className="mt-3 w-full bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 border border-amber-500/30"
+              variant="ghost"
+            >
+              <Copy className="w-4 h-4 mr-2" />
+              {copied ? "Copied!" : "Copy Address"}
+            </Button>
+          </div>
+
+          <div className="bg-amber-500/10 rounded-xl p-4 border border-amber-500/30 mb-4">
+            <p className="text-amber-400 text-sm font-medium">Amount to Pay</p>
+            <p className="text-3xl font-bold text-amber-400 mt-1">₦10,000</p>
+            <p className="text-white/50 text-xs mt-1">Equivalent in USDT via Pursa Exchange</p>
+          </div>
+
+          <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-3 flex items-start gap-2">
+            <AlertTriangle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
+            <p className="text-red-300 text-xs">Only send on the <strong>{NETWORK}</strong> network. Sending on the wrong network will result in permanent loss of funds.</p>
+          </div>
+        </motion.div>
+
+        {/* Step by Step Guide */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-2xl p-6 border border-slate-700/50 mb-4"
+        >
+          <h2 className="text-lg font-semibold text-white mb-4">How to Pay via Pursa Exchange</h2>
           <div className="space-y-4">
-            <div className="bg-slate-900/50 rounded-xl p-4">
-              <div className="flex justify-between items-center mb-3">
-                <span className="text-white/50">Bank</span>
-                <span className="text-white font-medium">{PAYMENT_DETAILS.bank}</span>
-              </div>
-              <div className="flex justify-between items-center mb-3">
-                <span className="text-white/50">Account Number</span>
-                <div className="flex items-center gap-2">
-                  <span className="text-white font-medium">{PAYMENT_DETAILS.accountNumber}</span>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={() => copyToClipboard(PAYMENT_DETAILS.accountNumber)}
-                    className="h-8 w-8 text-amber-400 hover:text-amber-300"
-                  >
-                    <Copy className="w-4 h-4" />
-                  </Button>
+            {[
+              {
+                num: "01",
+                title: "Go to Pursa",
+                desc: "Visit the Pursa Exchange website.",
+                action: { label: "Open Pursa", url: "https://pursa.io" }
+              },
+              {
+                num: "02",
+                title: "Select USDT",
+                desc: "Choose Tether (USDT) as the cryptocurrency you want to buy."
+              },
+              {
+                num: "03",
+                title: "Enter Amount",
+                desc: "Input ₦10,000. The system will automatically show the USDT equivalent."
+              },
+              {
+                num: "04",
+                title: "Paste Wallet Address",
+                desc: `Copy and paste the USDT wallet address above. Make sure to select the ${NETWORK} network.`
+              },
+              {
+                num: "05",
+                title: "Make Payment",
+                desc: "Follow the bank transfer details shown on Pursa and complete the payment."
+              },
+              {
+                num: "06",
+                title: "Upload Proof & Submit",
+                desc: "Take a screenshot of your payment confirmation and upload it below."
+              }
+            ].map((step, i) => (
+              <div key={i} className="flex gap-4">
+                <div className="flex-shrink-0">
+                  <span className="text-2xl font-bold text-amber-500/30">{step.num}</span>
+                </div>
+                <div className="flex-1 pb-4 border-b border-slate-700/50 last:border-0">
+                  <p className="text-white font-semibold">{step.title}</p>
+                  <p className="text-white/50 text-sm mt-1">{step.desc}</p>
+                  {step.action && (
+                    <a
+                      href={step.action.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 mt-2 text-amber-400 text-sm hover:text-amber-300"
+                    >
+                      {step.action.label} <ExternalLink className="w-3 h-3" />
+                    </a>
+                  )}
                 </div>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-white/50">Account Name</span>
-                <span className="text-white font-medium">{PAYMENT_DETAILS.accountName}</span>
-              </div>
-            </div>
-
-            <div className="bg-amber-500/10 rounded-xl p-4 border border-amber-500/30">
-              <p className="text-amber-400 text-sm font-medium">Amount to Pay</p>
-              <p className="text-3xl font-bold text-amber-400 mt-1">₦10,000</p>
-            </div>
+            ))}
           </div>
+        </motion.div>
+
+        {/* Upload Proof Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-2xl p-6 border border-slate-700/50"
+        >
+          <h2 className="text-lg font-semibold text-white mb-4">Upload Payment Proof</h2>
 
           <div className="mt-6">
             <Label className="text-white/70">Upload Payment Proof</Label>
