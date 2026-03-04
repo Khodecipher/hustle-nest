@@ -146,7 +146,7 @@ export default function Landing() {
           >
             {[
               { value: "₦10K", label: "Registration" },
-              { value: "1,500", label: "Daily Coins" },
+              { value: "1,700", label: "Daily Coins" },
               { value: "Weekly", label: "Payouts" }
             ].map((stat, i) => (
               <div key={i} className="bg-slate-900/50 border border-slate-800 rounded-2xl p-4">

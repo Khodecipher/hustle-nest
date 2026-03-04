@@ -22,7 +22,7 @@ export default function Dashboard() {
   const [submittingWithdrawal, setSubmittingWithdrawal] = useState(false);
   const [pendingWithdrawal, setPendingWithdrawal] = useState(null);
 
-  const MAX_DAILY_COINS = 1500;
+  const MAX_DAILY_COINS = 1700;
   const WEEKLY_REFERRAL_TARGET = 2;
   const MONTHLY_REFERRAL_TARGET = 8;
 
