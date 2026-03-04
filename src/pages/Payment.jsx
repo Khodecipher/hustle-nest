@@ -313,37 +313,34 @@ export default function Payment() {
         >
           <h2 className="text-lg font-semibold text-white mb-4">Upload Payment Proof</h2>
 
-          <div className="mt-6">
-            <Label className="text-white/70">Upload Payment Proof</Label>
-            <div className="mt-2">
-              <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-slate-600 rounded-xl hover:border-amber-500/50 transition-colors cursor-pointer bg-slate-900/30">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileUpload}
-                  className="hidden"
-                />
-                {paymentProof ? (
-                  <div className="flex items-center gap-2 text-green-400">
-                    <CheckCircle className="w-5 h-5" />
-                    <span>Proof uploaded</span>
-                  </div>
-                ) : uploading ? (
-                  <div className="w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <div className="flex flex-col items-center text-white/50">
-                    <Upload className="w-8 h-8 mb-2" />
-                    <span className="text-sm">Click to upload screenshot</span>
-                  </div>
-                )}
-              </label>
-            </div>
+          <div className="mb-4">
+            <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-slate-600 rounded-xl hover:border-amber-500/50 transition-colors cursor-pointer bg-slate-900/30">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileUpload}
+                className="hidden"
+              />
+              {paymentProof ? (
+                <div className="flex items-center gap-2 text-green-400">
+                  <CheckCircle className="w-5 h-5" />
+                  <span>Proof uploaded</span>
+                </div>
+              ) : uploading ? (
+                <div className="w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <div className="flex flex-col items-center text-white/50">
+                  <Upload className="w-8 h-8 mb-2" />
+                  <span className="text-sm">Click to upload screenshot</span>
+                </div>
+              )}
+            </label>
           </div>
 
           <Button
             onClick={submitPayment}
             disabled={!paymentProof || uploading}
-            className="w-full mt-6 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white"
+            className="w-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white"
           >
             {uploading ? "Processing..." : "Submit Payment"}
           </Button>
