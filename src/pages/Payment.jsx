@@ -9,11 +9,8 @@ import { createPageUrl } from "@/utils";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 
-const PAYMENT_DETAILS = {
-  bank: "Opay",
-  accountNumber: "1234567890",
-  accountName: "Hustle Nest Ltd"
-};
+const USDT_ADDRESS = "PASTE_YOUR_USDT_ADDRESS_HERE";
+const NETWORK = "BEP20";
 
 export default function Payment() {
   const [user, setUser] = useState(null);
