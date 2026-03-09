@@ -40,7 +40,7 @@ export default function Landing() {
   };
 
   const features = [
-    { icon: Coins, title: "Earn Daily", desc: "Tap coins daily to earn up to 1,500 coins" },
+    { icon: Coins, title: "Earn Daily", desc: "Tap coins daily to earn up to 1,700 coins" },
     { icon: Users, title: "Refer & Earn", desc: "Invite friends and meet withdrawal targets" },
     { icon: Wallet, title: "Weekly Payouts", desc: "Withdraw every Saturday with 2+ referrals" },
     { icon: TrendingUp, title: "Grow Together", desc: "Join 10,000+ hustlers earning daily" }

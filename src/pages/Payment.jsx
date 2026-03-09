@@ -9,8 +9,8 @@ import { createPageUrl } from "@/utils";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 
-const USDT_ADDRESS = "PASTE_YOUR_USDT_ADDRESS_HERE";
-const NETWORK = "BEP20";
+const USDT_ADDRESS = "0x1C7B3246f0bB8c23121264ca8762Ef21f2056B44";
+const NETWORK = "ERC-20 (Ethereum)";
 
 export default function Payment() {
   const [user, setUser] = useState(null);
