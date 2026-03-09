@@ -240,9 +240,17 @@ export default function Payment() {
             <p className="text-white/50 text-xs mt-1">Equivalent in USDT via Pursa Exchange</p>
           </div>
 
-          <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-3 flex items-start gap-2">
-            <AlertTriangle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
-            <p className="text-red-300 text-xs">Only send on the <strong>{NETWORK}</strong> network. Sending on the wrong network will result in permanent loss of funds.</p>
+          <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-red-300 text-sm font-bold mb-1">⚠️ CRITICAL WARNING — Read Before Sending</p>
+              <p className="text-red-300 text-xs leading-relaxed">
+                You <strong>MUST</strong> send USDT on the <strong>ERC-20 (Ethereum)</strong> network only. 
+                Do <strong>NOT</strong> use BEP-20, TRC-20, or any other network. 
+                Sending on the wrong network will result in <strong>permanent and irreversible loss of your funds</strong>. 
+                We cannot recover funds sent on the wrong network. Always double-check the network before confirming your transaction.
+              </p>
+            </div>
           </div>
         </motion.div>
 
@@ -275,7 +283,7 @@ export default function Payment() {
               {
                 num: "04",
                 title: "Paste Wallet Address",
-                desc: `Copy and paste the USDT wallet address above. Make sure to select the ${NETWORK} network.`
+                desc: `Copy and paste the USDT wallet address above. ⚠️ IMPORTANT: You must select the ERC-20 (Ethereum) network. Using any other network (BEP-20, TRC-20, etc.) will cause permanent loss of funds.`
               },
               {
                 num: "05",

@@ -48,7 +48,7 @@ export default function Landing() {
 
   const steps = [
     { num: "01", title: "Register & Pay", desc: "One-time ₦10,000 registration fee" },
-    { num: "02", title: "Tap Daily", desc: "Earn 1,500 coins every day (Sun-Fri)" },
+    { num: "02", title: "Tap Daily", desc: "Earn 1,700 coins every day (Sun-Fri)" },
     { num: "03", title: "Refer Friends", desc: "Get 2 referrals weekly to withdraw" },
     { num: "04", title: "Cash Out", desc: "Withdraw earnings every Saturday" }
   ];
