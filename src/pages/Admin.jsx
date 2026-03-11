@@ -345,19 +345,9 @@ export default function Admin() {
                       </Badge>
                     </div>
                     <div className="bg-slate-900/50 rounded-lg p-3 mb-3">
-                      <div className="grid grid-cols-3 gap-2 text-sm">
-                        <div>
-                          <p className="text-white/50">Bank</p>
-                          <p className="text-white">{withdrawal.bank_name}</p>
-                        </div>
-                        <div>
-                          <p className="text-white/50">Account</p>
-                          <p className="text-white">{withdrawal.account_number}</p>
-                        </div>
-                        <div>
-                          <p className="text-white/50">Name</p>
-                          <p className="text-white">{withdrawal.account_name}</p>
-                        </div>
+                      <div className="text-sm">
+                        <p className="text-white/50 mb-1">USDT Address (ERC-20)</p>
+                        <p className="text-white font-mono text-xs break-all">{withdrawal.usdt_address || "—"}</p>
                       </div>
                     </div>
                     {(withdrawal.status === 'pending' || withdrawal.status === 'approved') && (

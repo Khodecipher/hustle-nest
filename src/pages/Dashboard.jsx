@@ -189,11 +189,9 @@ export default function Dashboard() {
   const handleWithdrawal = async (formData) => {
     setSubmittingWithdrawal(true);
     try {
-      // Save bank details to user
+      // Save USDT address to user profile
       await base44.auth.updateMe({
-        bank_name: formData.bank_name,
-        account_number: formData.account_number,
-        account_name: formData.account_name
+        usdt_address: formData.usdt_address
       });
 
       // Get current week number
@@ -208,9 +206,7 @@ export default function Dashboard() {
         coins_converted: formData.coins,
         referrals_used: weeklyReferrals,
         status: "pending",
-        bank_name: formData.bank_name,
-        account_number: formData.account_number,
-        account_name: formData.account_name,
+        usdt_address: formData.usdt_address,
         week_number: weekNumber
       });
 
@@ -445,11 +441,7 @@ export default function Dashboard() {
                   canWithdraw={weeklyReferrals >= WEEKLY_REFERRAL_TARGET && totalCoins > 0 && !pendingWithdrawal}
                   referralCount={weeklyReferrals}
                   requiredReferrals={WEEKLY_REFERRAL_TARGET}
-                  savedBankDetails={{
-                    bank_name: user?.bank_name,
-                    account_number: user?.account_number,
-                    account_name: user?.account_name
-                  }}
+                  savedUsdtAddress={user?.usdt_address}
                   onSubmit={handleWithdrawal}
                   isSubmitting={submittingWithdrawal}
                 />
