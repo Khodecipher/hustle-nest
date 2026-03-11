@@ -428,11 +428,21 @@ export default function Admin() {
                   <div className="flex items-center gap-3">
                     <div className="text-right">
                       <p className="text-amber-400 font-medium">{userItem.total_coins || 0} coins</p>
-                      <p className="text-white/50 text-xs">₦{(userItem.total_withdrawn || 0).toLocaleString()} withdrawn</p>
                     </div>
                     <Badge className={userItem.has_paid ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'}>
                       {userItem.has_paid ? 'Paid' : 'Unpaid'}
                     </Badge>
+                    <Badge className={userItem.role === 'admin' ? 'bg-red-500/20 text-red-400' : 'bg-slate-700 text-slate-400'}>
+                      {userItem.role === 'admin' ? 'Admin' : 'User'}
+                    </Badge>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleToggleAdmin(userItem)}
+                      className="border-slate-600 text-white/70 hover:text-white hover:bg-slate-700 text-xs"
+                    >
+                      {userItem.role === 'admin' ? 'Remove Admin' : 'Make Admin'}
+                    </Button>
                   </div>
                 </motion.div>
               ))}
