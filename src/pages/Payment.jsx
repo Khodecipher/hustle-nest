@@ -113,12 +113,19 @@ export default function Payment() {
         });
       }
 
-      // Notify admin
-      await base44.integrations.Core.SendEmail({
-        to: "lavezziomotola@gmail.com",
-        subject: "New Payment Proof Submitted",
-        body: `A new payment proof has been submitted on Hustle Nest.\n\nUser: ${user.full_name || user.email}\nEmail: ${user.email}\n\nPlease log in to the admin panel to review and confirm the payment.`
-      });
+      // Notify admins
+      await Promise.all([
+        base44.integrations.Core.SendEmail({
+          to: "lavezziomotola@gmail.com",
+          subject: "New Payment Proof Submitted",
+          body: `A new payment proof has been submitted on Hustle Nest.\n\nUser: ${user.full_name || user.email}\nEmail: ${user.email}\n\nPlease log in to the admin panel to review and confirm the payment.`
+        }),
+        base44.integrations.Core.SendEmail({
+          to: "mercygrace903@gmail.com",
+          subject: "New Payment Proof Submitted",
+          body: `A new payment proof has been submitted on Hustle Nest.\n\nUser: ${user.full_name || user.email}\nEmail: ${user.email}\n\nPlease log in to the admin panel to review and confirm the payment.`
+        })
+      ]);
 
       toast.success("Payment submitted for verification!");
       loadUserAndPayment();

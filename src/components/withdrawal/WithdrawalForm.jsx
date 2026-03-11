@@ -1,43 +1,28 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Wallet, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Wallet, AlertCircle, CheckCircle2, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
-const NIGERIAN_BANKS = [
-  "Access Bank", "Citibank", "Ecobank", "Fidelity Bank", "First Bank",
-  "First City Monument Bank", "Guaranty Trust Bank", "Heritage Bank",
-  "Keystone Bank", "Polaris Bank", "Providus Bank", "Stanbic IBTC",
-  "Standard Chartered", "Sterling Bank", "Union Bank", "United Bank for Africa",
-  "Unity Bank", "Wema Bank", "Zenith Bank", "Opay", "Palmpay", "Kuda Bank", "Moniepoint"
-];
 
 export default function WithdrawalForm({ 
   totalCoins, 
   canWithdraw, 
   referralCount,
   requiredReferrals,
-  savedBankDetails,
+  savedUsdtAddress,
   onSubmit,
   isSubmitting 
 }) {
-  const [bankName, setBankName] = useState(savedBankDetails?.bank_name || "");
-  const [accountNumber, setAccountNumber] = useState(savedBankDetails?.account_number || "");
-  const [accountName, setAccountName] = useState(savedBankDetails?.account_name || "");
+  const [usdtAddress, setUsdtAddress] = useState(savedUsdtAddress || "");
 
-  // 1 coin = 1 Naira for simplicity
   const withdrawableAmount = totalCoins;
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!canWithdraw) return;
-    
     onSubmit({
-      bank_name: bankName,
-      account_number: accountNumber,
-      account_name: accountName,
+      usdt_address: usdtAddress,
       amount: withdrawableAmount,
       coins: totalCoins
     });
@@ -56,6 +41,19 @@ export default function WithdrawalForm({
         <div>
           <h3 className="text-white font-semibold">Withdraw Earnings</h3>
           <p className="text-white/50 text-sm">Every Saturday 1:00 AM - 1:00 PM</p>
+        </div>
+      </div>
+
+      {/* ERC-20 Warning */}
+      <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 mb-5 flex items-start gap-3">
+        <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+        <div>
+          <p className="text-red-300 text-sm font-bold mb-1">⚠️ ERC-20 Network Only</p>
+          <p className="text-red-300 text-xs leading-relaxed">
+            You <strong>MUST</strong> submit a USDT <strong>ERC-20 (Ethereum)</strong> wallet address only. 
+            Do <strong>NOT</strong> submit a BEP-20, TRC-20, or any other network address. 
+            If you submit the wrong chain address, your funds will be sent to that address and <strong>we will NOT be liable for any lost funds</strong> resulting from your mistake. Always double-check your address and network before submitting.
+          </p>
         </div>
       </div>
 
@@ -82,7 +80,7 @@ export default function WithdrawalForm({
             <div>
               <p className="text-green-400 font-medium">Ready to withdraw!</p>
               <p className="text-green-400/70 text-sm mt-1">
-                You have {referralCount} referrals and ₦{withdrawableAmount.toLocaleString()} available.
+                You have {referralCount} referrals and {withdrawableAmount.toLocaleString()} coins available.
               </p>
             </div>
           </div>
@@ -91,52 +89,26 @@ export default function WithdrawalForm({
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <Label className="text-white/70">Bank Name</Label>
-          <Select value={bankName} onValueChange={setBankName}>
-            <SelectTrigger className="bg-slate-900/50 border-slate-700 text-white mt-1.5">
-              <SelectValue placeholder="Select your bank" />
-            </SelectTrigger>
-            <SelectContent>
-              {NIGERIAN_BANKS.map(bank => (
-                <SelectItem key={bank} value={bank}>{bank}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div>
-          <Label className="text-white/70">Account Number</Label>
+          <Label className="text-white/70">USDT Wallet Address (ERC-20 only)</Label>
           <Input
             type="text"
-            value={accountNumber}
-            onChange={(e) => setAccountNumber(e.target.value)}
-            placeholder="Enter 10-digit account number"
-            maxLength={10}
-            className="bg-slate-900/50 border-slate-700 text-white mt-1.5"
-          />
-        </div>
-
-        <div>
-          <Label className="text-white/70">Account Name</Label>
-          <Input
-            type="text"
-            value={accountName}
-            onChange={(e) => setAccountName(e.target.value)}
-            placeholder="Enter account holder name"
-            className="bg-slate-900/50 border-slate-700 text-white mt-1.5"
+            value={usdtAddress}
+            onChange={(e) => setUsdtAddress(e.target.value)}
+            placeholder="0x... (ERC-20 address)"
+            className="bg-slate-900/50 border-slate-700 text-white mt-1.5 font-mono text-sm"
           />
         </div>
 
         <div className="bg-slate-900/50 rounded-xl p-4">
           <div className="flex justify-between items-center">
-            <span className="text-white/70">Amount to withdraw</span>
-            <span className="text-2xl font-bold text-green-400">₦{withdrawableAmount.toLocaleString()}</span>
+            <span className="text-white/70">Coins to convert</span>
+            <span className="text-2xl font-bold text-green-400">{withdrawableAmount.toLocaleString()}</span>
           </div>
         </div>
 
         <Button
           type="submit"
-          disabled={!canWithdraw || isSubmitting || !bankName || !accountNumber || !accountName}
+          disabled={!canWithdraw || isSubmitting || !usdtAddress.trim()}
           className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white disabled:opacity-50"
         >
           {isSubmitting ? "Processing..." : "Request Withdrawal"}
