@@ -163,9 +163,15 @@ export default function Admin() {
   );
 
   const filteredWithdrawals = withdrawals.filter(w =>
-    w.user_email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    w.account_name?.toLowerCase().includes(searchTerm.toLowerCase())
+    w.user_email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handleToggleAdmin = async (userItem) => {
+    const newRole = userItem.role === 'admin' ? 'user' : 'admin';
+    await base44.entities.User.update(userItem.id, { role: newRole });
+    toast.success(`${userItem.email} is now ${newRole}`);
+    loadData();
+  };
 
   if (loading) {
     return (
