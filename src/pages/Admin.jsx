@@ -59,12 +59,16 @@ export default function Admin() {
   const loadData = async () => {
     try {
 
-      // Load all data in parallel
-      const [paymentsData, withdrawalsData, usersData] = await Promise.all([
+      // Load all data in parallel - use allSettled so one failure doesn't block others
+      const [paymentsResult, withdrawalsResult, usersResult] = await Promise.allSettled([
         base44.entities.Payment.list('-created_date'),
         base44.entities.Withdrawal.list('-created_date'),
         base44.entities.User.list()
       ]);
+
+      const paymentsData = paymentsResult.status === 'fulfilled' ? paymentsResult.value : [];
+      const withdrawalsData = withdrawalsResult.status === 'fulfilled' ? withdrawalsResult.value : [];
+      const usersData = usersResult.status === 'fulfilled' ? usersResult.value : [];
 
       setPayments(paymentsData);
       setWithdrawals(withdrawalsData);
@@ -193,7 +197,7 @@ export default function Admin() {
       <header className="relative z-10 px-4 py-4 border-b border-slate-800">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link to={createPageUrl("Landing")} className="text-white/60 hover:text-white">
+            <Link to={createPageUrl("Dashboard")} className="text-white/60 hover:text-white">
               <ArrowLeft className="w-5 h-5" />
             </Link>
             <div className="flex items-center gap-3">
