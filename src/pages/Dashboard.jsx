@@ -102,7 +102,9 @@ export default function Dashboard() {
     
     if (currentCoins >= MAX_DAILY_COINS) return;
 
-    const newCoins = currentCoins + 1;
+    const COINS_PER_TAP = 10;
+    const newCoins = Math.min(currentCoins + COINS_PER_TAP, MAX_DAILY_COINS);
+    const actualCoinsAdded = newCoins - currentCoins;
     
     // Optimistic update
     setDailyEarning(prev => ({
@@ -114,7 +116,7 @@ export default function Dashboard() {
     // Update user total coins optimistically
     setUser(prev => ({
       ...prev,
-      total_coins: (prev?.total_coins || 0) + 1
+      total_coins: (prev?.total_coins || 0) + actualCoinsAdded
     }));
 
     try {
@@ -127,7 +129,7 @@ export default function Dashboard() {
         const newEarning = await base44.entities.DailyEarning.create({
           user_email: user.email,
           date: today,
-          coins_earned: 1,
+          coins_earned: COINS_PER_TAP,
           taps_count: 1
         });
         setDailyEarning(newEarning);
@@ -135,7 +137,7 @@ export default function Dashboard() {
 
       // Update user's total coins
       await base44.auth.updateMe({
-        total_coins: (user.total_coins || 0) + 1
+        total_coins: (user.total_coins || 0) + actualCoinsAdded
       });
 
     } catch (err) {
@@ -146,8 +148,9 @@ export default function Dashboard() {
       }));
       setUser(prev => ({
         ...prev,
-        total_coins: prev.total_coins - 1
+        total_coins: prev.total_coins - actualCoinsAdded
       }));
+      toast.error("Tap failed, please try again");
     }
   };
 

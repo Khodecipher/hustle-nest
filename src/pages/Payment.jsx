@@ -244,7 +244,7 @@ export default function Payment() {
           <div className="bg-amber-500/10 rounded-xl p-4 border border-amber-500/30 mb-4">
             <p className="text-amber-400 text-sm font-medium">Amount to Pay</p>
             <p className="text-3xl font-bold text-amber-400 mt-1">₦10,000</p>
-            <p className="text-white/50 text-xs mt-1">Equivalent in USDT via Pursa Exchange</p>
+            <p className="text-white/50 text-xs mt-1">Equivalent in USDT via Bitget Wallet</p>
           </div>
 
           <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 flex items-start gap-3">
@@ -268,39 +268,39 @@ export default function Payment() {
           transition={{ delay: 0.15 }}
           className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-2xl p-6 border border-slate-700/50 mb-4"
         >
-          <h2 className="text-lg font-semibold text-white mb-4">How to Pay via Pursa Exchange</h2>
+          <h2 className="text-lg font-semibold text-white mb-4">How to Pay via Bitget Wallet</h2>
           <div className="space-y-4">
             {[
               {
                 num: "01",
-                title: "Go to Pursa",
-                desc: "Visit the Pursa Exchange website.",
-                action: { label: "Open Pursa", url: "https://pursa.co" }
+                title: "Create Bitget Wallet",
+                desc: "Download and create a wallet on Bitget. Make sure to create a USDT wallet on the Ethereum (ERC-20) network.",
+                action: { label: "Open Bitget", url: "https://www.bitget.com" }
               },
               {
                 num: "02",
-                title: "Select USDT",
-                desc: "Choose Tether (USDT) as the cryptocurrency you want to buy."
+                title: "Copy Our Wallet Address",
+                desc: "Copy the USDT wallet address shown above (our receiving address)."
               },
               {
                 num: "03",
-                title: "Enter Amount",
-                desc: "Input ₦10,000. The system will automatically show the USDT equivalent."
+                title: "Convert Naira to USDT",
+                desc: "Use Bitget to convert ₦10,000 to USDT on the ERC-20 (Ethereum) network."
               },
               {
                 num: "04",
-                title: "Paste Wallet Address",
-                desc: `Copy and paste the USDT wallet address above. ⚠️ IMPORTANT: You must select the ERC-20 (Ethereum) network. Using any other network (BEP-20, TRC-20, etc.) will cause permanent loss of funds.`
+                title: "Send to Our Address",
+                desc: `Send the USDT to the wallet address you copied. ⚠️ CRITICAL: You must send on the ERC-20 (Ethereum) network only. Using any other network (BEP-20, TRC-20, etc.) will cause permanent loss of funds.`
               },
               {
                 num: "05",
-                title: "Make Payment",
-                desc: "Follow the bank transfer details shown on Pursa and complete the payment."
+                title: "Screenshot Transaction",
+                desc: "Take a screenshot of your transaction confirmation showing the amount, our address, and the ERC-20 network."
               },
               {
                 num: "06",
-                title: "Upload Proof & Submit",
-                desc: "Take a screenshot of your payment confirmation and upload it below."
+                title: "Upload & Submit",
+                desc: "Upload your transaction screenshot below and submit for verification."
               }
             ].map((step, i) => (
               <div key={i} className="flex gap-4">

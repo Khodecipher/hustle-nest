@@ -19,11 +19,15 @@ export default function CoinTapper({ coinsEarned, maxCoins, onTap, disabled }) {
       id: Date.now() + Math.random(),
       x,
       y,
-      value: "+1"
+      value: "+10"
     };
     
     setTapAnimations(prev => [...prev, newAnimation]);
-    onTap();
+    
+    // Call onTap and prevent duplicate rapid calls
+    if (onTap) {
+      onTap();
+    }
     
     setTimeout(() => {
       setTapAnimations(prev => prev.filter(a => a.id !== newAnimation.id));
