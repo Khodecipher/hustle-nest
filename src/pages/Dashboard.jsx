@@ -155,36 +155,53 @@ export default function Dashboard() {
   };
 
   const canTapToday = () => {
-    const now = new Date();
-    const day = now.getDay();
-    // Sunday = 0, Saturday = 6
-    // Allow tapping Sunday (0) to Friday (5)
-    return day !== 6;
+    // TESTING MODE: Always allow tapping
+    return true;
+    
+    // PRODUCTION CODE (uncomment for live):
+    // const now = new Date();
+    // const day = now.getDay();
+    // return day !== 6; // Sunday (0) to Friday (5)
   };
 
   const isWithdrawalWindow = () => {
-    const now = new Date();
-    const day = now.getDay();
-    const hour = now.getHours();
+    // TESTING MODE: Always allow withdrawals
+    return true;
     
-    // Saturday (6), between 1:00 AM and 1:00 PM
-    return day === 6 && hour >= 1 && hour < 13;
+    // PRODUCTION CODE (uncomment for live):
+    // const now = new Date();
+    // const day = now.getDay();
+    // const hour = now.getHours();
+    // return day === 6 && hour >= 1 && hour < 13;
   };
 
   const getNextWithdrawalDate = () => {
     const now = new Date();
     const day = now.getDay();
     
-    // Calculate days until Saturday
-    const daysUntilSaturday = (6 - day + 7) % 7 || 7;
+    // Calculate days until next Saturday
+    let daysUntilSaturday;
+    if (day === 6) {
+      // It's Saturday
+      const hour = now.getHours();
+      if (hour < 13) {
+        // Before 1 PM, withdrawal window is still open
+        daysUntilSaturday = 0;
+      } else {
+        // After 1 PM, go to next Saturday
+        daysUntilSaturday = 7;
+      }
+    } else if (day === 0) {
+      // Sunday
+      daysUntilSaturday = 6;
+    } else {
+      // Monday (1) to Friday (5)
+      daysUntilSaturday = 6 - day;
+    }
+    
     const nextSaturday = new Date(now);
     nextSaturday.setDate(now.getDate() + daysUntilSaturday);
     nextSaturday.setHours(1, 0, 0, 0);
-    
-    // If it's Saturday and past 1 PM, go to next Saturday
-    if (day === 6 && now.getHours() >= 13) {
-      nextSaturday.setDate(nextSaturday.getDate() + 7);
-    }
     
     return nextSaturday;
   };
