@@ -275,7 +275,7 @@ export default function Payment() {
                 num: "01",
                 title: "Create Bitget Wallet",
                 desc: "Download and create a wallet on Bitget. Make sure to create a USDT wallet on the Ethereum (ERC-20) network.",
-                action: { label: "Open Bitget", url: "https://www.bitget.com" }
+                action: { label: "Open Bitget", url: "https://web3.bitget.com" }
               },
               {
                 num: "02",
