@@ -456,6 +456,14 @@ export default function Admin() {
                     <Button
                       size="sm"
                       variant="outline"
+                      onClick={() => handleTogglePaid(userItem)}
+                      className={`text-xs ${userItem.has_paid ? 'border-red-500/50 text-red-400 hover:bg-red-500/10' : 'border-green-500/50 text-green-400 hover:bg-green-500/10'}`}
+                    >
+                      {userItem.has_paid ? 'Mark Unpaid' : '✓ Mark Paid'}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
                       onClick={() => handleToggleAdmin(userItem)}
                       className="border-slate-600 text-white/70 hover:text-white hover:bg-slate-700 text-xs"
                     >
