@@ -427,6 +427,11 @@ export default function Admin() {
 
           {/* Users Tab */}
           <TabsContent value="users">
+            {allUsers.length === 0 && (
+              <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mb-4 text-amber-400 text-sm">
+                ⚠️ User list requires app owner access. Use the Payments tab to approve payments and grant dashboard access.
+              </div>
+            )}
             <div className="space-y-3">
               {allUsers.filter(u => 
                 u.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
