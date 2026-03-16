@@ -103,6 +103,9 @@ export default function Admin() {
   const handlePaymentAction = async (payment, action) => {
     try {
       if (action === 'confirm') {
+        // Fetch fresh user list to avoid stale data issues
+        const freshUsers = await base44.entities.User.list();
+
         await base44.entities.Payment.update(payment.id, {
           status: 'confirmed',
           confirmed_by: adminUser,
@@ -110,27 +113,31 @@ export default function Admin() {
         });
 
         // Update user's has_paid status
-        const userToUpdate = allUsers.find(u => u.email === payment.user_email);
-        if (userToUpdate) {
-          await base44.entities.User.update(userToUpdate.id, { has_paid: true });
+        const userToUpdate = freshUsers.find(u => u.email === payment.user_email);
+        if (!userToUpdate) {
+          toast.error("User not found — payment marked confirmed but user status not updated");
+          setSelectedPayment(null);
+          loadData();
+          return;
+        }
+
+        await base44.entities.User.update(userToUpdate.id, { has_paid: true });
           
-          // Check if user was referred and create referral record
-          if (userToUpdate.referred_by) {
-            // Find referrer by referral code
-            const referrer = allUsers.find(u => u.referral_code === userToUpdate.referred_by);
-            if (referrer) {
-              await base44.entities.Referral.create({
-                referrer_email: referrer.email,
-                referred_email: userToUpdate.email,
-                referred_name: userToUpdate.full_name,
-                status: "confirmed",
-                counted_for_withdrawal: false
-              });
-            }
+        // Check if user was referred and create referral record
+        if (userToUpdate.referred_by) {
+          const referrer = freshUsers.find(u => u.referral_code === userToUpdate.referred_by);
+          if (referrer) {
+            await base44.entities.Referral.create({
+              referrer_email: referrer.email,
+              referred_email: userToUpdate.email,
+              referred_name: userToUpdate.full_name,
+              status: "confirmed",
+              counted_for_withdrawal: false
+            });
           }
         }
 
-        toast.success("Payment confirmed!");
+        toast.success("Payment confirmed! User can now access the dashboard.");
       } else {
         await base44.entities.Payment.update(payment.id, {
           status: 'rejected'

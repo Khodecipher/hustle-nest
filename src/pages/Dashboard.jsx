@@ -155,24 +155,16 @@ export default function Dashboard() {
   };
 
   const canTapToday = () => {
-    // TESTING MODE: Always allow tapping
-    return true;
-    
-    // PRODUCTION CODE (uncomment for live):
-    // const now = new Date();
-    // const day = now.getDay();
-    // return day !== 6; // Sunday (0) to Friday (5)
+    const now = new Date();
+    const day = now.getDay();
+    return day !== 6; // Sunday (0) to Friday (5), no tapping on Saturday
   };
 
   const isWithdrawalWindow = () => {
-    // TESTING MODE: Always allow withdrawals
-    return true;
-    
-    // PRODUCTION CODE (uncomment for live):
-    // const now = new Date();
-    // const day = now.getDay();
-    // const hour = now.getHours();
-    // return day === 6 && hour >= 1 && hour < 13;
+    const now = new Date();
+    const day = now.getDay();
+    const hour = now.getHours();
+    return day === 6 && hour >= 1 && hour < 13; // Saturday 1AM - 1PM only
   };
 
   const getNextWithdrawalDate = () => {
