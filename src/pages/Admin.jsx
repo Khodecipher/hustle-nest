@@ -58,8 +58,8 @@ export default function Admin() {
 
   const loadData = async () => {
     try {
-
-      // Load all data in parallel - use allSettled so one failure doesn't block others
+      // Load payments and withdrawals (admins can access these)
+      // User.list() requires collaborator access, so we skip it for non-owner admins
       const [paymentsResult, withdrawalsResult, usersResult] = await Promise.allSettled([
         base44.entities.Payment.list('-created_date'),
         base44.entities.Withdrawal.list('-created_date'),
@@ -74,8 +74,16 @@ export default function Admin() {
       setWithdrawals(withdrawalsData);
       setAllUsers(usersData);
 
-      // Calculate stats
-      const paidUsers = usersData.filter(u => u.has_paid).length;
+      // Stats: use confirmed payments count as paid users if user list unavailable
+      const paidUsers = usersData.length > 0
+        ? usersData.filter(u => u.has_paid).length
+        : paymentsData.filter(p => p.status === 'confirmed').length;
+
+      const uniqueUserEmails = new Set([
+        ...paymentsData.map(p => p.user_email),
+        ...withdrawalsData.map(w => w.user_email)
+      ]);
+
       const pendingPayments = paymentsData.filter(p => p.status === 'pending').length;
       const pendingWithdrawals = withdrawalsData.filter(w => w.status === 'pending').length;
       const totalPaidOut = withdrawalsData
@@ -83,7 +91,7 @@ export default function Admin() {
         .reduce((sum, w) => sum + (w.amount || 0), 0);
 
       setStats({
-        totalUsers: usersData.length,
+        totalUsers: usersData.length > 0 ? usersData.length : uniqueUserEmails.size,
         paidUsers,
         pendingPayments,
         pendingWithdrawals,
