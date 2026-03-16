@@ -184,6 +184,13 @@ export default function Admin() {
     loadData();
   };
 
+  const handleTogglePaid = async (userItem) => {
+    const newPaidStatus = !userItem.has_paid;
+    await base44.entities.User.update(userItem.id, { has_paid: newPaidStatus });
+    toast.success(`${userItem.email} marked as ${newPaidStatus ? 'PAID ✓' : 'unpaid'}`);
+    loadData();
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center">
