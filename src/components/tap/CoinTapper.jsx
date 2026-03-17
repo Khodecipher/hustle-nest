@@ -1,65 +1,115 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Coins, Sparkles } from "lucide-react";
+import { base44 } from "@/api/base44Client";
+import { toast } from "sonner";
 
-export default function CoinTapper({ coinsEarned, maxCoins, onTap, disabled }) {
+const MAX_DAILY_COINS = 1700;
+const COINS_PER_TAP = 10;
+const BATCH_INTERVAL_MS = 2000; // flush to API every 2 seconds
+
+export default function CoinTapper({ coinsEarned, maxCoins, userEmail, dailyEarning, onCoinsUpdate, disabled }) {
+  const [localCoins, setLocalCoins] = useState(coinsEarned);
   const [tapAnimations, setTapAnimations] = useState([]);
   const [isPressed, setIsPressed] = useState(false);
-  const [isCooldown, setIsCooldown] = useState(false);
-  const progress = (coinsEarned / maxCoins) * 100;
-  const remaining = maxCoins - coinsEarned;
+  const [dailyEarningRef, setDailyEarningRef] = useState(dailyEarning);
+
+  const pendingTapsRef = useRef(0);
+  const isSavingRef = useRef(false);
+  const localCoinsRef = useRef(coinsEarned);
+  const tapsCountRef = useRef(dailyEarning?.taps_count || 0);
+
+  // Sync from parent when props change (e.g. on initial load)
+  useEffect(() => {
+    setLocalCoins(coinsEarned);
+    localCoinsRef.current = coinsEarned;
+    setDailyEarningRef(dailyEarning);
+    tapsCountRef.current = dailyEarning?.taps_count || 0;
+  }, [coinsEarned, dailyEarning]);
+
+  const flushTaps = useCallback(async () => {
+    if (pendingTapsRef.current === 0 || isSavingRef.current) return;
+    
+    const tapsToSave = pendingTapsRef.current;
+    pendingTapsRef.current = 0;
+    isSavingRef.current = true;
+
+    const coinsToAdd = tapsToSave * COINS_PER_TAP;
+    const newCoins = Math.min(localCoinsRef.current, maxCoins);
+    const newTapsCount = tapsCountRef.current;
+
+    try {
+      const today = new Date().toISOString().split('T')[0];
+
+      if (dailyEarningRef?.id) {
+        await base44.entities.DailyEarning.update(dailyEarningRef.id, {
+          coins_earned: newCoins,
+          taps_count: newTapsCount
+        });
+      } else {
+        const created = await base44.entities.DailyEarning.create({
+          user_email: userEmail,
+          date: today,
+          coins_earned: newCoins,
+          taps_count: newTapsCount
+        });
+        setDailyEarningRef(created);
+      }
+
+      // Update user total coins
+      await base44.auth.updateMe({ total_coins: newCoins });
+
+      if (onCoinsUpdate) onCoinsUpdate(newCoins);
+
+    } catch (err) {
+      // Re-queue failed taps
+      pendingTapsRef.current += tapsToSave;
+      toast.error("Sync failed, will retry...");
+    }
+
+    isSavingRef.current = false;
+  }, [dailyEarningRef, userEmail, maxCoins, onCoinsUpdate]);
+
+  // Auto-flush every BATCH_INTERVAL_MS
+  useEffect(() => {
+    const interval = setInterval(flushTaps, BATCH_INTERVAL_MS);
+    return () => {
+      clearInterval(interval);
+      flushTaps(); // flush on unmount
+    };
+  }, [flushTaps]);
 
   const handleTap = (e) => {
-    if (disabled || coinsEarned >= maxCoins || isCooldown) return;
-    
+    if (disabled || localCoinsRef.current >= maxCoins) return;
+
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-    
-    const newAnimation = {
-      id: Date.now() + Math.random(),
-      x,
-      y,
-      value: "+10"
-    };
-    
+
+    const newAnimation = { id: Date.now() + Math.random(), x, y };
     setTapAnimations(prev => [...prev, newAnimation]);
-    
-    // Set cooldown to prevent rate limiting
-    setIsCooldown(true);
-    
-    // Call onTap
-    if (onTap) {
-      onTap();
-    }
-    
     setTimeout(() => {
       setTapAnimations(prev => prev.filter(a => a.id !== newAnimation.id));
-    }, 1000);
-    
-    // 500ms cooldown between taps
-    setTimeout(() => {
-      setIsCooldown(false);
-    }, 500);
+    }, 800);
+
+    const newCoins = Math.min(localCoinsRef.current + COINS_PER_TAP, maxCoins);
+    localCoinsRef.current = newCoins;
+    tapsCountRef.current += 1;
+    pendingTapsRef.current += 1;
+    setLocalCoins(newCoins);
   };
+
+  const progress = (localCoins / maxCoins) * 100;
+  const remaining = maxCoins - localCoins;
 
   return (
     <div className="flex flex-col items-center">
       {/* Progress Ring */}
       <div className="relative mb-6">
         <svg className="w-64 h-64 transform -rotate-90">
+          <circle cx="128" cy="128" r="120" stroke="rgba(255,255,255,0.1)" strokeWidth="8" fill="none" />
           <circle
-            cx="128"
-            cy="128"
-            r="120"
-            stroke="rgba(255,255,255,0.1)"
-            strokeWidth="8"
-            fill="none"
-          />
-          <circle
-            cx="128"
-            cy="128"
-            r="120"
+            cx="128" cy="128" r="120"
             stroke="url(#gradient)"
             strokeWidth="8"
             fill="none"
@@ -75,26 +125,26 @@ export default function CoinTapper({ coinsEarned, maxCoins, onTap, disabled }) {
             </linearGradient>
           </defs>
         </svg>
-        
+
         {/* Tap Button */}
         <motion.button
           onPointerDown={() => setIsPressed(true)}
           onPointerUp={() => setIsPressed(false)}
           onPointerLeave={() => setIsPressed(false)}
           onClick={handleTap}
-          disabled={disabled || coinsEarned >= maxCoins || isCooldown}
+          disabled={disabled || localCoins >= maxCoins}
           animate={{ scale: isPressed ? 0.95 : 1 }}
           transition={{ type: "spring", stiffness: 400, damping: 17 }}
           className={`absolute inset-8 rounded-full flex flex-col items-center justify-center transition-all ${
-            disabled || coinsEarned >= maxCoins
+            disabled || localCoins >= maxCoins
               ? "bg-gray-700 cursor-not-allowed"
               : "bg-gradient-to-br from-amber-500 to-orange-600 shadow-2xl shadow-orange-500/30 hover:shadow-orange-500/50 cursor-pointer active:shadow-orange-500/60"
           }`}
         >
           <Coins className="w-16 h-16 text-white mb-2" />
-          <span className="text-white text-3xl font-bold">{coinsEarned}</span>
+          <span className="text-white text-3xl font-bold">{localCoins}</span>
           <span className="text-white/70 text-sm">/ {maxCoins}</span>
-          
+
           {/* Floating Animations */}
           <AnimatePresence>
             {tapAnimations.map(anim => (
@@ -108,17 +158,17 @@ export default function CoinTapper({ coinsEarned, maxCoins, onTap, disabled }) {
               >
                 <span className="text-yellow-300 font-bold text-xl flex items-center gap-1">
                   <Sparkles className="w-4 h-4" />
-                  {anim.value}
+                  +10
                 </span>
               </motion.div>
             ))}
           </AnimatePresence>
         </motion.button>
       </div>
-      
+
       {/* Status */}
       <div className="text-center">
-        {coinsEarned >= maxCoins ? (
+        {localCoins >= maxCoins ? (
           <p className="text-green-400 font-semibold">🎉 Daily limit reached! Come back tomorrow.</p>
         ) : disabled ? (
           <p className="text-amber-400 font-semibold">⏰ Tapping available Sunday - Friday</p>
