@@ -331,7 +331,9 @@ export default function Dashboard() {
               <CoinTapper
                 coinsEarned={todayCoins}
                 maxCoins={MAX_DAILY_COINS}
-                onTap={handleTap}
+                userEmail={user?.email}
+                dailyEarning={dailyEarning}
+                onCoinsUpdate={handleCoinsUpdate}
                 disabled={!canTapToday()}
               />
             </div>
