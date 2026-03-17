@@ -58,32 +58,42 @@ export default function Admin() {
 
   const loadData = async () => {
     try {
-      // Load payments and withdrawals (admins can access these)
-      // User.list() requires collaborator access, so we skip it for non-owner admins
-      const [paymentsResult, withdrawalsResult, usersResult] = await Promise.allSettled([
+      // Payments and Withdrawals are accessible by all admins via RLS
+      // User.list() is owner-only, so we build user data from payments instead
+      const [paymentsData, withdrawalsData] = await Promise.all([
         base44.entities.Payment.list('-created_date'),
         base44.entities.Withdrawal.list('-created_date'),
-        base44.entities.User.list()
       ]);
-
-      const paymentsData = paymentsResult.status === 'fulfilled' ? paymentsResult.value : [];
-      const withdrawalsData = withdrawalsResult.status === 'fulfilled' ? withdrawalsResult.value : [];
-      const usersData = usersResult.status === 'fulfilled' ? usersResult.value : [];
 
       setPayments(paymentsData);
       setWithdrawals(withdrawalsData);
-      setAllUsers(usersData);
 
-      // Stats: use confirmed payments count as paid users if user list unavailable
-      const paidUsers = usersData.length > 0
-        ? usersData.filter(u => u.has_paid).length
-        : paymentsData.filter(p => p.status === 'confirmed').length;
+      // Build user records from payment data (available to all admins)
+      const userMap = {};
+      for (const p of paymentsData) {
+        if (!userMap[p.user_email]) {
+          userMap[p.user_email] = { email: p.user_email, has_paid: false, payment_status: p.status };
+        }
+        if (p.status === 'confirmed') userMap[p.user_email].has_paid = true;
+      }
+      // Merge withdrawal info
+      for (const w of withdrawalsData) {
+        if (!userMap[w.user_email]) userMap[w.user_email] = { email: w.user_email };
+      }
 
-      const uniqueUserEmails = new Set([
-        ...paymentsData.map(p => p.user_email),
-        ...withdrawalsData.map(w => w.user_email)
-      ]);
+      // Fetch full user records for each known email using filter (works for all admins)
+      const emails = Object.keys(userMap);
+      const userRecords = await Promise.all(
+        emails.map(email => base44.entities.User.filter({ email }).then(r => r?.[0]).catch(() => null))
+      );
 
+      const mergedUsers = userRecords
+        .filter(Boolean)
+        .map(u => ({ ...userMap[u.email], ...u }));
+
+      setAllUsers(mergedUsers);
+
+      const paidUsers = mergedUsers.filter(u => u.has_paid).length;
       const pendingPayments = paymentsData.filter(p => p.status === 'pending').length;
       const pendingWithdrawals = withdrawalsData.filter(w => w.status === 'pending').length;
       const totalPaidOut = withdrawalsData
@@ -91,7 +101,7 @@ export default function Admin() {
         .reduce((sum, w) => sum + (w.amount || 0), 0);
 
       setStats({
-        totalUsers: usersData.length > 0 ? usersData.length : uniqueUserEmails.size,
+        totalUsers: mergedUsers.length,
         paidUsers,
         pendingPayments,
         pendingWithdrawals,
