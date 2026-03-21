@@ -138,14 +138,14 @@ export default function Admin() {
 
   const handleToggleAdmin = async (userItem) => {
     const newRole = userItem.role === 'admin' ? 'user' : 'admin';
-    await base44.entities.User.update(userItem.id, { role: newRole });
+    await base44.functions.invoke('adminUpdateUser', { userId: userItem.id, data: { role: newRole } });
     toast.success(`${userItem.email} is now ${newRole}`);
     loadData();
   };
 
   const handleTogglePaid = async (userItem) => {
     const newPaidStatus = !userItem.has_paid;
-    await base44.entities.User.update(userItem.id, { has_paid: newPaidStatus });
+    await base44.functions.invoke('adminUpdateUser', { userId: userItem.id, data: { has_paid: newPaidStatus } });
     toast.success(`${userItem.email} marked as ${newPaidStatus ? 'PAID ✓' : 'unpaid'}`);
     loadData();
   };
