@@ -38,6 +38,9 @@ export default function Admin() {
 
   useEffect(() => {
     checkAdminAndLoadData();
+    // Auto-refresh every 30 seconds to catch new payments
+    const interval = setInterval(loadData, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   const checkAdminAndLoadData = async () => {
