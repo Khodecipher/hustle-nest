@@ -411,7 +411,7 @@ export default function Dashboard() {
                   <Wallet className="w-12 h-12 text-white/30 mx-auto mb-4" />
                   <h3 className="text-white font-semibold mb-2">Withdrawal Window Closed</h3>
                   <p className="text-white/50 text-sm">
-                    Withdrawals are only available on Saturdays from 1:00 AM to 1:00 PM.
+                    Withdrawals are only available on Saturdays and Sundays.
                     Keep earning and referring to maximize your payout!
                   </p>
                 </motion.div>
