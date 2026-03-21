@@ -116,37 +116,27 @@ export default function Dashboard() {
   const isWithdrawalWindow = () => {
     const now = new Date();
     const day = now.getDay();
-    const hour = now.getHours();
-    return day === 6 && hour >= 1 && hour < 13; // Saturday 1AM - 1PM only
+    // Open from Saturday all day through Sunday midnight (end of Sunday)
+    return day === 6 || day === 0;
   };
 
   const getNextWithdrawalDate = () => {
     const now = new Date();
     const day = now.getDay();
     
-    // Calculate days until next Saturday
+    // If it's Mon–Fri, count days until Saturday
     let daysUntilSaturday;
-    if (day === 6) {
-      // It's Saturday
-      const hour = now.getHours();
-      if (hour < 13) {
-        // Before 1 PM, withdrawal window is still open
-        daysUntilSaturday = 0;
-      } else {
-        // After 1 PM, go to next Saturday
-        daysUntilSaturday = 7;
-      }
-    } else if (day === 0) {
-      // Sunday
-      daysUntilSaturday = 6;
+    if (day === 6 || day === 0) {
+      // Already in window, shouldn't show countdown
+      daysUntilSaturday = 0;
     } else {
-      // Monday (1) to Friday (5)
+      // Monday(1)–Friday(5): days until Saturday
       daysUntilSaturday = 6 - day;
     }
     
     const nextSaturday = new Date(now);
     nextSaturday.setDate(now.getDate() + daysUntilSaturday);
-    nextSaturday.setHours(1, 0, 0, 0);
+    nextSaturday.setHours(0, 0, 0, 0);
     
     return nextSaturday;
   };
