@@ -466,21 +466,21 @@ export default function Admin() {
                       href={selectedPayment.payment_proof}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="hidden w-full text-center py-3 rounded-lg border border-slate-600 text-amber-400 hover:bg-slate-800 text-sm"
+                      className="hidden text-amber-400 text-sm underline"
                     >
-                      🖼️ Open Screenshot in New Tab
+                      Image failed to load — click here to open in new tab
                     </a>
                     <a
                       href={selectedPayment.payment_proof}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="block w-full text-center py-2 text-xs text-white/40 hover:text-white/70"
+                      className="block text-center text-amber-400/70 text-xs hover:text-amber-400 mt-1"
                     >
                       Open image in new tab ↗
                     </a>
                   </div>
                 ) : (
-                  <p className="text-red-400 text-sm italic">No payment proof uploaded</p>
+                  <p className="text-red-400 text-sm italic">No proof uploaded</p>
                 )}
               </div>
               <div className="flex gap-3 pt-4">
