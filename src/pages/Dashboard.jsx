@@ -61,16 +61,16 @@ export default function Dashboard() {
         setDailyEarning(earnings[0]);
       }
 
-      // Load confirmed referrals
+      // Load ALL referrals (confirmed)
       const allReferrals = await base44.entities.Referral.filter({
         referrer_email: userData.email,
         status: "confirmed"
       });
       setReferrals(allReferrals);
 
-      // Calculate weekly referrals (not yet used for withdrawal)
-      const weeklyRefs = allReferrals.filter(r => !r.counted_for_withdrawal);
-      setWeeklyReferrals(weeklyRefs.length);
+      // Active referrals = confirmed but not yet used in a withdrawal
+      const activeRefs = allReferrals.filter(r => !r.counted_for_withdrawal);
+      setWeeklyReferrals(activeRefs.length);
 
       // Check for pending withdrawal
       const withdrawals = await base44.entities.Withdrawal.filter({
