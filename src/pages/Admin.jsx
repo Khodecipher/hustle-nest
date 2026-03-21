@@ -452,16 +452,37 @@ export default function Admin() {
                 <p className="text-white/50 text-sm">Amount</p>
                 <p className="text-green-400 text-xl font-bold">₦{selectedPayment.amount?.toLocaleString()}</p>
               </div>
-              {selectedPayment.payment_proof && (
-                <div>
-                  <p className="text-white/50 text-sm mb-2">Payment Proof</p>
-                  <img
-                    src={selectedPayment.payment_proof}
-                    alt="Payment proof"
-                    className="w-full rounded-lg"
-                  />
-                </div>
-              )}
+              <div>
+                <p className="text-white/50 text-sm mb-2">Payment Proof</p>
+                {selectedPayment.payment_proof ? (
+                  <div className="space-y-2">
+                    <img
+                      src={selectedPayment.payment_proof}
+                      alt="Payment proof"
+                      className="w-full rounded-lg border border-slate-700"
+                      onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'block'; }}
+                    />
+                    <a
+                      href={selectedPayment.payment_proof}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hidden w-full text-center py-3 rounded-lg border border-slate-600 text-amber-400 hover:bg-slate-800 text-sm"
+                    >
+                      🖼️ Open Screenshot in New Tab
+                    </a>
+                    <a
+                      href={selectedPayment.payment_proof}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block w-full text-center py-2 text-xs text-white/40 hover:text-white/70"
+                    >
+                      Open image in new tab ↗
+                    </a>
+                  </div>
+                ) : (
+                  <p className="text-red-400 text-sm italic">No payment proof uploaded</p>
+                )}
+              </div>
               <div className="flex gap-3 pt-4">
                 <Button
                   className="flex-1 bg-green-600 hover:bg-green-700"
