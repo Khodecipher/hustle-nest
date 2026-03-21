@@ -56,16 +56,6 @@ export default function CoinTapper({ coinsEarned, maxCoins, userEmail, dailyEarn
         setDailyEarningRef(created);
       }
 
-      // Update user total coins — add the delta to the existing total, don't overwrite with daily coins
-      const currentUser = await base44.auth.me();
-      const existingTotal = currentUser?.total_coins || 0;
-      // Only update if the new daily value is higher than what was last saved
-      const lastSavedDaily = dailyEarningRef?.coins_earned || 0;
-      const delta = newCoins - lastSavedDaily;
-      if (delta > 0) {
-        await base44.auth.updateMe({ total_coins: existingTotal + delta });
-      }
-
       if (onCoinsUpdate) onCoinsUpdate(newCoins);
 
     } catch (err) {
