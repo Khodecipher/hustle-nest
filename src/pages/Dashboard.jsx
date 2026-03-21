@@ -94,9 +94,17 @@ export default function Dashboard() {
     return `${prefix}${random}`;
   };
 
-  const handleCoinsUpdate = (newCoins) => {
-    setUser(prev => ({ ...prev, total_coins: newCoins }));
-    setDailyEarning(prev => ({ ...prev, coins_earned: newCoins }));
+  const handleCoinsUpdate = (newDailyCoins) => {
+    setUser(prev => {
+      // delta = new daily coins minus what daily was before this update
+      const prevDaily = dailyEarning?.coins_earned || 0;
+      const delta = newDailyCoins - prevDaily;
+      const newTotal = Math.max(0, (prev?.total_coins || 0) + delta);
+      // Persist total to user profile
+      base44.auth.updateMe({ total_coins: newTotal }).catch(() => {});
+      return { ...prev, total_coins: newTotal };
+    });
+    setDailyEarning(prev => ({ ...prev, coins_earned: newDailyCoins }));
   };
 
   const canTapToday = () => {
