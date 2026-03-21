@@ -89,9 +89,15 @@ export default function Dashboard() {
   };
 
   const generateReferralCode = (email) => {
+    // Deterministic code based on email so it's always the same
     const prefix = email.split('@')[0].substring(0, 4).toUpperCase();
-    const random = Math.random().toString(36).substring(2, 6).toUpperCase();
-    return `${prefix}${random}`;
+    let hash = 0;
+    for (let i = 0; i < email.length; i++) {
+      hash = ((hash << 5) - hash) + email.charCodeAt(i);
+      hash |= 0;
+    }
+    const suffix = Math.abs(hash).toString(36).substring(0, 4).toUpperCase();
+    return `${prefix}${suffix}`;
   };
 
   const handleCoinsUpdate = (newDailyCoins) => {
