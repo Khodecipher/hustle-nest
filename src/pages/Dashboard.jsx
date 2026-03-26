@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Coins, Users, Wallet, TrendingUp, Calendar, Settings, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,7 @@ export default function Dashboard() {
   const [weeklyReferrals, setWeeklyReferrals] = useState(0);
   const [submittingWithdrawal, setSubmittingWithdrawal] = useState(false);
   const [pendingWithdrawal, setPendingWithdrawal] = useState(null);
+  const baseCoinsRef = useRef(0); // total_coins minus today's coins (stable base)
 
   const MAX_DAILY_COINS = 1700;
   const WEEKLY_REFERRAL_TARGET = 2;
@@ -50,13 +51,32 @@ export default function Dashboard() {
         setUser({ ...userData });
       }
 
-      // Load today's earning
+      // Load today's earning + recalculate total from all records
       const today = new Date().toISOString().split('T')[0];
-      const earnings = await base44.entities.DailyEarning.filter({
-        user_email: userData.email,
-        date: today
+      const [earnings, allEarnings] = await Promise.all([
+        base44.entities.DailyEarning.filter({ user_email: userData.email, date: today }),
+        base44.entities.DailyEarning.filter({ user_email: userData.email })
+      ]);
+
+      // Recalculate correct total_coins from all DailyEarning records
+      const byDate = {};
+      allEarnings.forEach(e => {
+        if (!byDate[e.date] || e.coins_earned > byDate[e.date]) {
+          byDate[e.date] = e.coins_earned;
+        }
       });
-      
+      const totalEarned = Object.values(byDate).reduce((sum, c) => sum + c, 0);
+      const correctTotal = Math.max(0, totalEarned - (userData.total_withdrawn || 0));
+
+      // Fix total_coins if it's wrong
+      if (correctTotal !== (userData.total_coins || 0)) {
+        await base44.auth.updateMe({ total_coins: correctTotal });
+        userData.total_coins = correctTotal;
+      }
+
+      const todayCoinsEarned = earnings.length > 0 ? earnings[0].coins_earned : 0;
+      baseCoinsRef.current = correctTotal - todayCoinsEarned;
+
       if (earnings.length > 0) {
         setDailyEarning(earnings[0]);
       }
@@ -101,15 +121,10 @@ export default function Dashboard() {
   };
 
   const handleCoinsUpdate = (newDailyCoins) => {
-    setUser(prev => {
-      // delta = new daily coins minus what daily was before this update
-      const prevDaily = dailyEarning?.coins_earned || 0;
-      const delta = newDailyCoins - prevDaily;
-      const newTotal = Math.max(0, (prev?.total_coins || 0) + delta);
-      // Persist total to user profile
-      base44.auth.updateMe({ total_coins: newTotal }).catch(() => {});
-      return { ...prev, total_coins: newTotal };
-    });
+    // Use absolute calculation: stable base + today's coins (no stale delta issues)
+    const newTotal = baseCoinsRef.current + newDailyCoins;
+    base44.auth.updateMe({ total_coins: newTotal }).catch(() => {});
+    setUser(prev => ({ ...prev, total_coins: newTotal }));
     setDailyEarning(prev => ({ ...prev, coins_earned: newDailyCoins }));
   };
 
