@@ -116,15 +116,17 @@ export default function Admin() {
 
   const handleWithdrawalAction = async (withdrawal, action) => {
     try {
-      const newStatus = action === 'approve' ? 'approved' : action === 'paid' ? 'paid' : 'rejected';
-      
-      await base44.entities.Withdrawal.update(withdrawal.id, {
-        status: newStatus,
-        processed_by: adminUser,
-        processed_at: new Date().toISOString()
+      const response = await base44.functions.invoke('adminProcessWithdrawal', {
+        withdrawalId: withdrawal.id,
+        action,
+        adminEmail: adminUser
       });
-
-      toast.success(`Withdrawal ${newStatus}!`);
+      if (response.data?.error) {
+        toast.error(response.data.error);
+      } else {
+        const newStatus = action === 'approve' ? 'approved' : action === 'paid' ? 'paid' : 'rejected';
+        toast.success(`Withdrawal ${newStatus}!`);
+      }
       loadData();
     } catch (err) {
       toast.error("Failed to update withdrawal");
