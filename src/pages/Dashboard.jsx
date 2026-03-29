@@ -51,6 +51,13 @@ export default function Dashboard() {
         setUser({ ...userData });
       }
 
+      // Bug #9: Check for referral from localStorage
+      const storedRef = localStorage.getItem('referralCode');
+      if (storedRef && !userData.referred_by) {
+        await base44.auth.updateMe({ referred_by: storedRef });
+        localStorage.removeItem('referralCode');
+      }
+
       // Load today's earning + recalculate total from all records
       const today = new Date().toISOString().split('T')[0];
       const [earnings, allEarnings] = await Promise.all([
@@ -121,9 +128,11 @@ export default function Dashboard() {
   };
 
   const handleCoinsUpdate = (newDailyCoins) => {
-    // Use absolute calculation: stable base + today's coins (no stale delta issues)
+    // Use absolute calculation: stable base + today's coins
     const newTotal = baseCoinsRef.current + newDailyCoins;
-    base44.auth.updateMe({ total_coins: newTotal }).catch(() => {});
+    base44.auth.updateMe({ total_coins: newTotal }).catch((err) => {
+      toast.error("Failed to save coins. Please refresh.");
+    });
     setUser(prev => ({ ...prev, total_coins: newTotal }));
     setDailyEarning(prev => ({ ...prev, coins_earned: newDailyCoins }));
   };
@@ -194,10 +203,9 @@ export default function Dashboard() {
         });
       }
 
-      // Reset user's total coins
+      // Bug #2: Only zero coins on submit; total_withdrawn updated by admin on "paid"
       await base44.auth.updateMe({
-        total_coins: 0,
-        total_withdrawn: (user.total_withdrawn || 0) + formData.amount
+        total_coins: 0
       });
 
       toast.success("Withdrawal request submitted!");
