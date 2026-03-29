@@ -18,6 +18,7 @@ export default function CoinTapper({ coinsEarned, maxCoins, userEmail, dailyEarn
   const isSavingRef = useRef(false);
   const localCoinsRef = useRef(coinsEarned);
   const tapsCountRef = useRef(dailyEarning?.taps_count || 0);
+  const dailyEarningIdRef = useRef(dailyEarning?.id || null);
 
   // Sync from parent when props change (e.g. on initial load)
   useEffect(() => {
@@ -25,6 +26,7 @@ export default function CoinTapper({ coinsEarned, maxCoins, userEmail, dailyEarn
     localCoinsRef.current = coinsEarned;
     setDailyEarningRef(dailyEarning);
     tapsCountRef.current = dailyEarning?.taps_count || 0;
+    if (dailyEarning?.id) dailyEarningIdRef.current = dailyEarning.id;
   }, [coinsEarned, dailyEarning]);
 
   const flushTaps = useCallback(async () => {
@@ -41,18 +43,21 @@ export default function CoinTapper({ coinsEarned, maxCoins, userEmail, dailyEarn
     try {
       const today = new Date().toISOString().split('T')[0];
 
-      if (dailyEarningRef?.id) {
-        await base44.entities.DailyEarning.update(dailyEarningRef.id, {
+      if (dailyEarningIdRef.current) {
+        await base44.entities.DailyEarning.update(dailyEarningIdRef.current, {
           coins_earned: newCoins,
           taps_count: newTapsCount
         });
       } else {
+        // Lock to prevent concurrent creates
+        dailyEarningIdRef.current = 'creating';
         const created = await base44.entities.DailyEarning.create({
           user_email: userEmail,
           date: today,
           coins_earned: newCoins,
           taps_count: newTapsCount
         });
+        dailyEarningIdRef.current = created.id;
         setDailyEarningRef(created);
       }
 
