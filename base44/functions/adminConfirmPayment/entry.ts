@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.21';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
 Deno.serve(async (req) => {
   try {
@@ -29,18 +29,24 @@ Deno.serve(async (req) => {
 
       await base44.asServiceRole.entities.User.update(targetUser.id, { has_paid: true });
 
-      // Handle referral if user was referred
+      // Handle referral if user was referred (with duplicate check)
       if (targetUser.referred_by) {
         const referrers = await base44.asServiceRole.entities.User.filter({ referral_code: targetUser.referred_by });
         const referrer = referrers?.[0];
         if (referrer) {
-          await base44.asServiceRole.entities.Referral.create({
+          const existing = await base44.asServiceRole.entities.Referral.filter({
             referrer_email: referrer.email,
-            referred_email: targetUser.email,
-            referred_name: targetUser.full_name,
-            status: 'confirmed',
-            counted_for_withdrawal: false
+            referred_email: targetUser.email
           });
+          if (!existing || existing.length === 0) {
+            await base44.asServiceRole.entities.Referral.create({
+              referrer_email: referrer.email,
+              referred_email: targetUser.email,
+              referred_name: targetUser.full_name,
+              status: 'confirmed',
+              counted_for_withdrawal: false
+            });
+          }
         }
       }
 

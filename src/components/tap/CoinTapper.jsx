@@ -6,37 +6,36 @@ import { toast } from "sonner";
 
 const MAX_DAILY_COINS = 1700;
 const COINS_PER_TAP = 10;
-const BATCH_INTERVAL_MS = 2000; // flush to API every 2 seconds
+const BATCH_INTERVAL_MS = 2000;
 
 export default function CoinTapper({ coinsEarned, maxCoins, userEmail, dailyEarning, onCoinsUpdate, disabled }) {
   const [localCoins, setLocalCoins] = useState(coinsEarned);
   const [tapAnimations, setTapAnimations] = useState([]);
   const [isPressed, setIsPressed] = useState(false);
-  const [dailyEarningRef, setDailyEarningRef] = useState(dailyEarning);
 
   const pendingTapsRef = useRef(0);
   const isSavingRef = useRef(false);
   const localCoinsRef = useRef(coinsEarned);
   const tapsCountRef = useRef(dailyEarning?.taps_count || 0);
   const dailyEarningIdRef = useRef(dailyEarning?.id || null);
+  const isCreatingRef = useRef(false);
 
   // Sync from parent when props change (e.g. on initial load)
   useEffect(() => {
     setLocalCoins(coinsEarned);
     localCoinsRef.current = coinsEarned;
-    setDailyEarningRef(dailyEarning);
     tapsCountRef.current = dailyEarning?.taps_count || 0;
-    if (dailyEarning?.id) dailyEarningIdRef.current = dailyEarning.id;
+    if (dailyEarning?.id) {
+      dailyEarningIdRef.current = dailyEarning.id;
+      isCreatingRef.current = false;
+    }
   }, [coinsEarned, dailyEarning]);
 
   const flushTaps = useCallback(async () => {
     if (pendingTapsRef.current === 0 || isSavingRef.current) return;
     
-    const tapsToSave = pendingTapsRef.current;
-    pendingTapsRef.current = 0;
     isSavingRef.current = true;
-
-    const coinsToAdd = tapsToSave * COINS_PER_TAP;
+    const tapsToSave = pendingTapsRef.current;
     const newCoins = Math.min(localCoinsRef.current, maxCoins);
     const newTapsCount = tapsCountRef.current;
 
@@ -48,9 +47,9 @@ export default function CoinTapper({ coinsEarned, maxCoins, userEmail, dailyEarn
           coins_earned: newCoins,
           taps_count: newTapsCount
         });
-      } else {
-        // Lock to prevent concurrent creates
-        dailyEarningIdRef.current = 'creating';
+      } else if (!isCreatingRef.current) {
+        // Use a proper flag to prevent concurrent creates
+        isCreatingRef.current = true;
         const created = await base44.entities.DailyEarning.create({
           user_email: userEmail,
           date: today,
@@ -58,26 +57,33 @@ export default function CoinTapper({ coinsEarned, maxCoins, userEmail, dailyEarn
           taps_count: newTapsCount
         });
         dailyEarningIdRef.current = created.id;
-        setDailyEarningRef(created);
+      } else {
+        // Another create is in flight — re-queue taps and bail
+        isSavingRef.current = false;
+        return;
       }
 
+      // Only clear pending taps AFTER successful save
+      pendingTapsRef.current -= tapsToSave;
       if (onCoinsUpdate) onCoinsUpdate(newCoins);
 
     } catch (err) {
-      // Re-queue failed taps
-      pendingTapsRef.current += tapsToSave;
+      // Don't clear pending taps on failure — they'll retry next flush
+      if (!dailyEarningIdRef.current) {
+        isCreatingRef.current = false; // allow retry
+      }
       toast.error("Sync failed, will retry...");
     }
 
     isSavingRef.current = false;
-  }, [dailyEarningRef, userEmail, maxCoins, onCoinsUpdate]);
+  }, [userEmail, maxCoins, onCoinsUpdate]);
 
   // Auto-flush every BATCH_INTERVAL_MS
   useEffect(() => {
     const interval = setInterval(flushTaps, BATCH_INTERVAL_MS);
     return () => {
       clearInterval(interval);
-      flushTaps(); // flush on unmount
+      flushTaps();
     };
   }, [flushTaps]);
 

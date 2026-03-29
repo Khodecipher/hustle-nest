@@ -23,29 +23,38 @@ Deno.serve(async (req) => {
       processed_at: new Date().toISOString()
     });
 
-    // When marked as paid: reset user's coins and update total_withdrawn
-    if (newStatus === 'paid') {
+    // Fetch user for paid/rejected actions
+    if (newStatus === 'paid' || newStatus === 'rejected') {
       const users = await base44.asServiceRole.entities.User.filter({ email: withdrawal.user_email });
       const targetUser = users?.[0];
       if (targetUser) {
-        const newTotalWithdrawn = (targetUser.total_withdrawn || 0) + (withdrawal.amount || 0);
-        await base44.asServiceRole.entities.User.update(targetUser.id, {
-          total_coins: 0,
-          total_withdrawn: newTotalWithdrawn
-        });
-      }
-    }
-
-    // When rejected: restore coins back to user (don't penalize them)
-    if (newStatus === 'rejected') {
-      const users = await base44.asServiceRole.entities.User.filter({ email: withdrawal.user_email });
-      const targetUser = users?.[0];
-      if (targetUser) {
-        // Restore the coins that were zeroed when withdrawal was submitted
-        const restoredCoins = (targetUser.total_coins || 0) + (withdrawal.coins_converted || 0);
-        await base44.asServiceRole.entities.User.update(targetUser.id, {
-          total_coins: restoredCoins
-        });
+        if (newStatus === 'paid') {
+          // Update total_withdrawn (coins already zeroed on submission)
+          const newTotalWithdrawn = (targetUser.total_withdrawn || 0) + (withdrawal.amount || 0);
+          await base44.asServiceRole.entities.User.update(targetUser.id, {
+            total_withdrawn: newTotalWithdrawn
+          });
+        }
+        if (newStatus === 'rejected') {
+          // Restore the coins that were zeroed when withdrawal was submitted
+          const restoredCoins = (targetUser.total_coins || 0) + (withdrawal.coins_converted || 0);
+          // Also undo total_withdrawn since it wasn't incremented on submit anymore
+          await base44.asServiceRole.entities.User.update(targetUser.id, {
+            total_coins: restoredCoins
+          });
+          // Unmark referrals used for this withdrawal
+          const usedReferrals = await base44.asServiceRole.entities.Referral.filter({
+            referrer_email: withdrawal.user_email,
+            counted_for_withdrawal: true
+          });
+          // Restore up to the number used
+          const toRestore = usedReferrals.slice(0, withdrawal.referrals_used || 0);
+          for (const ref of toRestore) {
+            await base44.asServiceRole.entities.Referral.update(ref.id, {
+              counted_for_withdrawal: false
+            });
+          }
+        }
       }
     }
 
