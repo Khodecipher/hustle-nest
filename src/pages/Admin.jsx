@@ -150,7 +150,15 @@ export default function Admin() {
 
   const handleTogglePaid = async (userItem) => {
     const newPaidStatus = !userItem.has_paid;
-    await base44.functions.invoke('adminUpdateUser', { userId: userItem.id, data: { has_paid: newPaidStatus } });
+    const response = await base44.functions.invoke('adminUpdateUser', {
+      userId: userItem.id,
+      data: { has_paid: newPaidStatus },
+      adminEmail: adminUser
+    });
+    if (response.data?.error) {
+      toast.error(response.data.error);
+      return;
+    }
     toast.success(`${userItem.email} marked as ${newPaidStatus ? 'PAID ✓' : 'unpaid'}`);
     loadData();
   };
@@ -405,6 +413,9 @@ export default function Admin() {
                     <div>
                       <p className="text-white font-medium">{userItem.full_name || 'No name'}</p>
                       <p className="text-white/50 text-sm">{userItem.email}</p>
+                      {userItem.paid_confirmed_by && (
+                        <p className="text-white/30 text-xs">Paid by: {userItem.paid_confirmed_by} · {userItem.paid_confirmed_at ? new Date(userItem.paid_confirmed_at).toLocaleDateString() : ''}</p>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center gap-3">

@@ -1,0 +1,83 @@
+{
+  "name": "User",
+  "type": "object",
+  "properties": {
+    "referral_code": {
+      "type": "string",
+      "description": "Unique referral code for this user"
+    },
+    "referred_by": {
+      "type": "string",
+      "description": "Referral code of who referred this user"
+    },
+    "has_paid": {
+      "type": "boolean",
+      "default": false
+    },
+    "total_coins": {
+      "type": "number",
+      "default": 0
+    },
+    "total_withdrawn": {
+      "type": "number",
+      "default": 0
+    },
+    "usdt_address": {
+      "type": "string"
+    },
+    "bank_name": {
+      "type": "string"
+    },
+    "account_number": {
+      "type": "string"
+    },
+    "account_name": {
+      "type": "string"
+    },
+    "paid_confirmed_by": {
+      "type": "string",
+      "description": "Admin email who confirmed payment via toggle"
+    },
+    "paid_confirmed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When payment was confirmed via toggle"
+    }
+  },
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "data.email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
