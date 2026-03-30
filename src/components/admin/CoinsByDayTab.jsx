@@ -25,6 +25,27 @@ export default function CoinsByDayTab({ dailyEarnings, users }) {
     return Object.values(map);
   }, [dailyEarnings]);
 
+  // Build cumulative totals per user across days (oldest first)
+  const userCumulativeByDate = useMemo(() => {
+    // Group deduped by user, then sort each user's entries by date ascending
+    const byUser = {};
+    deduped.forEach(e => {
+      if (!byUser[e.user_email]) byUser[e.user_email] = [];
+      byUser[e.user_email].push({ date: e.date, coins: e.coins_earned });
+    });
+    // For each user, compute running total per date
+    const cumMap = {}; // { "user@email_2024-01-01": cumulativeTotal }
+    Object.entries(byUser).forEach(([email, entries]) => {
+      entries.sort((a, b) => a.date.localeCompare(b.date));
+      let running = 0;
+      entries.forEach(e => {
+        running += e.coins;
+        cumMap[`${email}_${e.date}`] = running;
+      });
+    });
+    return cumMap;
+  }, [deduped]);
+
   // BY DAY view data
   const byDayData = useMemo(() => {
     const dateMap = {};
@@ -38,13 +59,13 @@ export default function CoinsByDayTab({ dailyEarnings, users }) {
         email: e.user_email,
         name: userData?.full_name || e.user_email,
         coinsToday: e.coins_earned,
-        totalCoins: userData?.total_coins || 0
+        cumulativeTotal: userCumulativeByDate[`${e.user_email}_${e.date}`] || e.coins_earned
       });
     });
     return Object.values(dateMap)
       .sort((a, b) => b.date.localeCompare(a.date))
       .map(d => ({ ...d, users: d.users.sort((a, b) => b.coinsToday - a.coinsToday) }));
-  }, [deduped, userMap]);
+  }, [deduped, userMap, userCumulativeByDate]);
 
   // BY USER view data
   const byUserData = useMemo(() => {
@@ -184,13 +205,14 @@ export default function CoinsByDayTab({ dailyEarnings, users }) {
                         className="overflow-hidden"
                       >
                         <div className="bg-slate-900/50 border-t border-slate-700/30">
-                          <div className="grid grid-cols-3 gap-4 px-4 py-2 text-white/40 text-xs uppercase">
+                          <div className="grid grid-cols-4 gap-4 px-4 py-2 text-white/40 text-xs uppercase">
                             <span></span>
                             <span>User</span>
-                            <span className="text-right">Coins Earned</span>
+                            <span className="text-center">Today</span>
+                            <span className="text-right">Total</span>
                           </div>
                           {day.users.map((u, i) => (
-                            <div key={u.email} className="grid grid-cols-3 gap-4 px-4 py-2 hover:bg-slate-800/50">
+                            <div key={u.email} className="grid grid-cols-4 gap-4 px-4 py-2 hover:bg-slate-800/50">
                               <span className="flex items-center pl-2">
                                 <User className="w-3 h-3 text-white/30" />
                               </span>
@@ -198,7 +220,8 @@ export default function CoinsByDayTab({ dailyEarnings, users }) {
                                 <p className="text-white text-sm truncate">{u.name}</p>
                                 <p className="text-white/40 text-xs truncate">{u.email}</p>
                               </div>
-                              <span className="text-amber-400 text-sm text-right">{u.coinsToday.toLocaleString()}</span>
+                              <span className="text-amber-400 text-sm text-center">{u.coinsToday.toLocaleString()}</span>
+                              <span className="text-white/70 text-sm font-medium text-right">{u.cumulativeTotal.toLocaleString()}</span>
                             </div>
                           ))}
                         </div>
