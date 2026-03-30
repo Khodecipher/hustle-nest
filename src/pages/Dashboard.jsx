@@ -127,12 +127,9 @@ export default function Dashboard() {
     return `${prefix}${suffix}`;
   };
 
-  const handleCoinsUpdate = (newDailyCoins) => {
-    // Use absolute calculation: stable base + today's coins
-    const newTotal = baseCoinsRef.current + newDailyCoins;
-    base44.auth.updateMe({ total_coins: newTotal }).catch((err) => {
-      toast.error("Failed to save coins. Please refresh.");
-    });
+  const handleCoinsUpdate = (newDailyCoins, serverTotalCoins) => {
+    // Backend already calculated the correct total — use it directly
+    const newTotal = serverTotalCoins != null ? serverTotalCoins : (baseCoinsRef.current + newDailyCoins);
     setUser(prev => ({ ...prev, total_coins: newTotal }));
     setDailyEarning(prev => ({ ...prev, coins_earned: newDailyCoins }));
   };
