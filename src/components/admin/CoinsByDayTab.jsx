@@ -184,14 +184,13 @@ export default function CoinsByDayTab({ dailyEarnings, users }) {
                         className="overflow-hidden"
                       >
                         <div className="bg-slate-900/50 border-t border-slate-700/30">
-                          <div className="grid grid-cols-4 gap-4 px-4 py-2 text-white/40 text-xs uppercase">
+                          <div className="grid grid-cols-3 gap-4 px-4 py-2 text-white/40 text-xs uppercase">
                             <span></span>
                             <span>User</span>
-                            <span className="text-center">Today's Coins</span>
-                            <span className="text-right">Total Balance</span>
+                            <span className="text-right">Coins Earned</span>
                           </div>
                           {day.users.map((u, i) => (
-                            <div key={u.email} className="grid grid-cols-4 gap-4 px-4 py-2 hover:bg-slate-800/50">
+                            <div key={u.email} className="grid grid-cols-3 gap-4 px-4 py-2 hover:bg-slate-800/50">
                               <span className="flex items-center pl-2">
                                 <User className="w-3 h-3 text-white/30" />
                               </span>
@@ -199,8 +198,7 @@ export default function CoinsByDayTab({ dailyEarnings, users }) {
                                 <p className="text-white text-sm truncate">{u.name}</p>
                                 <p className="text-white/40 text-xs truncate">{u.email}</p>
                               </div>
-                              <span className="text-amber-400 text-sm text-center">{u.coinsToday.toLocaleString()}</span>
-                              <span className="text-white/70 text-sm text-right">{u.totalCoins.toLocaleString()}</span>
+                              <span className="text-amber-400 text-sm text-right">{u.coinsToday.toLocaleString()}</span>
                             </div>
                           ))}
                         </div>
