@@ -12,14 +12,15 @@ Deno.serve(async (req) => {
     }
 
     // Use service role so all admins (not just owner) can fetch all data
-    const [payments, withdrawals, users, referrals] = await Promise.all([
+    const [payments, withdrawals, users, referrals, dailyEarnings] = await Promise.all([
       base44.asServiceRole.entities.Payment.list('-created_date', 500),
       base44.asServiceRole.entities.Withdrawal.list('-created_date', 500),
       base44.asServiceRole.entities.User.list('-created_date', 1000),
       base44.asServiceRole.entities.Referral.list('-created_date', 1000),
+      base44.asServiceRole.entities.DailyEarning.list('-date', 5000),
     ]);
 
-    return Response.json({ payments, withdrawals, users, referrals });
+    return Response.json({ payments, withdrawals, users, referrals, dailyEarnings });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }

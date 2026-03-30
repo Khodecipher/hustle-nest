@@ -19,6 +19,7 @@ import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
+import CoinsByDayTab from "@/components/admin/CoinsByDayTab";
 
 export default function Admin() {
   const [adminUser, setAdminUser] = useState("admin");
@@ -26,6 +27,7 @@ export default function Admin() {
   const [payments, setPayments] = useState([]);
   const [withdrawals, setWithdrawals] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
+  const [dailyEarnings, setDailyEarnings] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [stats, setStats] = useState({
@@ -62,11 +64,12 @@ export default function Admin() {
   const loadData = async () => {
     try {
       const response = await base44.functions.invoke('adminGetData', {});
-      const { payments: paymentsData, withdrawals: withdrawalsData, users: usersData } = response.data;
+      const { payments: paymentsData, withdrawals: withdrawalsData, users: usersData, dailyEarnings: dailyEarningsData } = response.data;
 
       setPayments(paymentsData);
       setWithdrawals(withdrawalsData);
       setAllUsers(usersData);
+      setDailyEarnings(dailyEarningsData || []);
 
       const paidUsers = usersData.filter(u => u.has_paid).length;
       const pendingPayments = paymentsData.filter(p => p.status === 'pending').length;
@@ -254,6 +257,9 @@ export default function Admin() {
             </TabsTrigger>
             <TabsTrigger value="users" className="data-[state=active]:bg-blue-500">
               Users ({stats.totalUsers})
+            </TabsTrigger>
+            <TabsTrigger value="coins" className="data-[state=active]:bg-amber-500">
+              Coins by Day
             </TabsTrigger>
           </TabsList>
 
@@ -448,6 +454,10 @@ export default function Admin() {
                 </motion.div>
               ))}
             </div>
+          </TabsContent>
+          {/* Coins by Day Tab */}
+          <TabsContent value="coins">
+            <CoinsByDayTab dailyEarnings={dailyEarnings} users={allUsers} />
           </TabsContent>
         </Tabs>
       </main>
